@@ -1,1 +1,4 @@
+/api/* http://154.194.52.246:8000/api/:splat 200
+/auth/* http://154.194.52.246:8000/auth/:splat 200
+/files/* http://154.194.52.246/files/:splat 200
 /*    /index.html   200
