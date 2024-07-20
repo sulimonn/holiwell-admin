@@ -8,9 +8,16 @@ const icon = (name) => (
   <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
 );
 
-const training = await getCourse('training');
-const listening = await getCourse('listening');
-const meditation = await getCourse('meditation');
+let training;
+let listening;
+let meditation;
+const fetchCourses = async () => {
+  training = await getCourse('training');
+  listening = await getCourse('listening');
+  meditation = await getCourse('meditation');
+};
+
+fetchCourses();
 
 const navConfig = [
   {
@@ -29,7 +36,7 @@ const navConfig = [
         title: 'Тренируйся',
         path: '/courses/training',
         level: 2,
-        children: training.courses
+        children: training?.courses
           ? [
               ...training.courses.map((item) => ({
                 ...item,
@@ -43,7 +50,7 @@ const navConfig = [
         title: 'Слушай',
         path: '/courses/listening',
         level: 2,
-        children: listening.courses
+        children: listening?.courses
           ? [
               ...listening.courses.map((item) => ({
                 ...item,
@@ -57,7 +64,7 @@ const navConfig = [
         title: 'Медитируй',
         path: '/courses/meditation',
         level: 2,
-        children: meditation.courses
+        children: meditation?.courses
           ? [
               ...meditation.courses.map((item) => ({
                 ...item,
@@ -70,7 +77,7 @@ const navConfig = [
     ],
   },
   {
-    title: 'Трейнеры',
+    title: 'Тренеры',
     path: '/trainers',
     icon: icon('ic_settings'),
     level: 1,

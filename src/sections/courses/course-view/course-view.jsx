@@ -11,7 +11,7 @@ import CourseFilters from '../course-filters';
 
 const CourseView = () => {
   const { courseId: id } = useParams();
-  const { data = {}, isSuccess } = useGetCourseQuery(id);
+  const { data = {}, isSuccess, isFetching } = useGetCourseQuery(id);
   const [course, setCourse] = useState(data);
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -28,7 +28,7 @@ const CourseView = () => {
   const handleCloseFilter = () => {
     setOpenFilter(false);
   };
-  if (!isSuccess) {
+  if (!isSuccess || isFetching) {
     return null;
   }
   return (
@@ -74,14 +74,15 @@ const CourseView = () => {
         </Stack>
       </Stack>
       <Grid container spacing={5}>
-        {course.lessons.map((lesson) => (
-          <Grid key={lesson.id} xs={12} sm={6} md={3} sx={{ height: '100%' }}>
-            <CourseCard
-              course={lesson}
-              link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
-            />
-          </Grid>
-        ))}
+        {course.lessons &&
+          course?.lessons.map((lesson) => (
+            <Grid key={lesson.id} xs={12} sm={6} md={3} sx={{ height: '100%' }}>
+              <CourseCard
+                course={lesson}
+                link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
+              />
+            </Grid>
+          ))}
       </Grid>
     </Container>
   );
