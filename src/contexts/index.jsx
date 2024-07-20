@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
 import React, { useMemo, useState, useEffect, useContext, useCallback, createContext } from 'react';
+
+import { useRouter } from 'src/routes/hooks';
 
 import { useGetMeQuery } from 'src/store/reducers/users';
 import { useLoginMutation, useLogoutMutation, useRegisterMutation } from 'src/store/reducers/auth';
@@ -10,7 +11,6 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
-  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState('loading');
   const [user, setUser] = useState(null);
   const [login] = useLoginMutation();
@@ -25,7 +25,13 @@ const AuthProvider = ({ children }) => {
   const [logout] = useLogoutMutation();
   const [register] = useRegisterMutation();
 
+  const router = useRouter();
+
   useEffect(() => {
+    if (!localStorage.getItem('authToken')) {
+      console.log('no token');
+      router.push('/login');
+    }
     if (userData) {
       setUser(userData);
       setIsAuthenticated(true);
@@ -33,7 +39,7 @@ const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setUser(null);
     }
-  }, [userData, navigate]);
+  }, [userData, router]);
 
   const handleLogin = useCallback(
     async (credentials) => {
@@ -59,11 +65,11 @@ const AuthProvider = ({ children }) => {
       localStorage.removeItem('authToken');
       setIsAuthenticated(false);
       setUser(null);
-      navigate('/login');
+      router.push('/login');
     } catch (error) {
       console.error('Failed to logout:', error);
     }
-  }, [logout, navigate]);
+  }, [logout, router]);
 
   const refreshAuthState = useCallback(() => {
     refetch();
@@ -105,9 +111,6 @@ const AuthProvider = ({ children }) => {
 
   if (isFetching || isLoading) {
     return null;
-  }
-  if (!localStorage.getItem('authToken')) {
-    navigate('/login');
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

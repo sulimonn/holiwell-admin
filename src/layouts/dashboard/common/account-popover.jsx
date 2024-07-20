@@ -32,7 +32,7 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
-  const { user: account } = useAuth();
+  const { user: account, logout } = useAuth();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -42,6 +42,9 @@ export default function AccountPopover() {
     setOpen(null);
   };
 
+  if (!account) {
+    return null;
+  }
   return (
     <>
       <IconButton
@@ -106,7 +109,12 @@ export default function AccountPopover() {
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
+          onClick={async () => {
+            const response = await logout();
+            if (response) {
+              handleClose();
+            }
+          }}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
           Logout

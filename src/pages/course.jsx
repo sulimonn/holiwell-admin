@@ -1,17 +1,17 @@
 import { Helmet } from 'react-helmet-async';
 
-import { ProductsView } from 'src/sections/products/view';
+import { CourseView } from 'src/sections/courses/course-view';
 
 // ----------------------------------------------------------------------
 
-export default function ProductsPage() {
+export default function CourseTypePage() {
   return (
     <>
       <Helmet>
-        <title> Products | Minimal UI </title>
+        <title> Курс | Holiwell Admin </title>
       </Helmet>
 
-      <ProductsView />
+      <CourseView />
     </>
   );
 }
