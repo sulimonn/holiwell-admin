@@ -27,10 +27,31 @@ const user = apiSlice.injectEndpoints({
       query: () => '/users/all',
       providesTags: ['User'],
     }),
+    deleteUser: builder.mutation({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['User'],
+    }),
+    editUser: builder.mutation({
+      query: (data) => ({
+        url: `/users/${data.id}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
-export const { useUpdateAvatarMutation, useGetMeQuery, useEditProfileMutation, useAllUsersQuery } =
-  user;
+export const {
+  useUpdateAvatarMutation,
+  useGetMeQuery,
+  useEditProfileMutation,
+  useAllUsersQuery,
+  useDeleteUserMutation,
+  useEditUserMutation,
+} = user;
 
 export default user;

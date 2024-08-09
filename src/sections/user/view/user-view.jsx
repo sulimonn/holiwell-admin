@@ -33,7 +33,7 @@ export default function UserPage() {
 
   const [selected, setSelected] = useState([]);
 
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('first_name');
 
   const [filterName, setFilterName] = useState('');
 
@@ -86,7 +86,6 @@ export default function UserPage() {
   const handleFilterByName = (event) => {
     setPage(0);
     setFilterName(event.target.value);
-    console.log(event.target.value);
   };
 
   const dataFiltered = applyFilter({
@@ -103,7 +102,7 @@ export default function UserPage() {
         <Typography variant="h4">Пользователи</Typography>
 
         <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-          New User
+          Добавить
         </Button>
       </Stack>
 
@@ -125,10 +124,10 @@ export default function UserPage() {
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'name', label: 'ФИО' },
+                  { id: 'first_name', label: 'ФИО' },
                   { id: 'email', label: 'Email' },
-                  { id: 'isSuperUser', label: 'Админ', align: 'center' },
-                  { id: 'status', label: 'Активен', align: 'center' },
+                  { id: 'is_superuser', label: 'Админ', align: 'center' },
+                  { id: 'is_active', label: 'Активен', align: 'center' },
                   { id: '' },
                 ]}
               />
@@ -138,6 +137,7 @@ export default function UserPage() {
                   .map((row) => (
                     <UserTableRow
                       key={row.id}
+                      id={row.id}
                       firstName={row.first_name}
                       lastName={row.last_name}
                       email={row.email}

@@ -22,7 +22,7 @@ export function responsiveFontSizes({ sm, md, lg }) {
   };
 }
 
-export const primaryFont = '"Geologica", Public Sans, sans-serif';
+export const primaryFont = '"Geologica", sans-serif';
 export const secondaryFont = '"Geologica", sans-serif';
 
 // ----------------------------------------------------------------------

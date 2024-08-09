@@ -173,7 +173,7 @@ function NavItem({ item }) {
       >
         {item.icon && (
           <Box component="span" sx={{ width: 24, height: 24, mr: 2 }}>
-            {item.icon}
+            1{item.icon}11111
           </Box>
         )}
 

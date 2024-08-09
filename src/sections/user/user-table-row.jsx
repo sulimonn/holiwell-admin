@@ -13,9 +13,12 @@ import IconButton from '@mui/material/IconButton';
 
 import Iconify from 'src/components/iconify';
 
+import { useDeleteUserMutation } from 'src/store/reducers/users';
+
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({
+  id,
   selected,
   firstName,
   avatarUrl,
@@ -26,6 +29,7 @@ export default function UserTableRow({
   handleClick,
 }) {
   const [open, setOpen] = useState(null);
+  const [deleteUser] = useDeleteUserMutation();
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -33,6 +37,13 @@ export default function UserTableRow({
 
   const handleCloseMenu = () => {
     setOpen(null);
+  };
+
+  const handleDeleteUser = async () => {
+    const response = await deleteUser(id);
+    if (response) {
+      handleCloseMenu();
+    }
   };
 
   return (
@@ -86,12 +97,12 @@ export default function UserTableRow({
       >
         <MenuItem onClick={handleCloseMenu}>
           <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-          Edit
+          Редактировать
         </MenuItem>
 
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
+        <MenuItem onClick={handleDeleteUser} sx={{ color: 'error.main' }}>
           <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-          Delete
+          Удалить
         </MenuItem>
       </Popover>
     </>
@@ -99,6 +110,7 @@ export default function UserTableRow({
 }
 
 UserTableRow.propTypes = {
+  id: PropTypes.any,
   avatarUrl: PropTypes.any,
   email: PropTypes.any,
   handleClick: PropTypes.func,

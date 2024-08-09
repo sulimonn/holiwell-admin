@@ -68,8 +68,7 @@ export default function LoginView() {
 
             setStatus({ success: false });
           }
-          if (response === null) {
-            console.log('Error: ', response);
+          if (!response) {
             router.push('/dashboard', { replace: true });
           }
         } catch (err) {
