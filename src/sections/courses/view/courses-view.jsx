@@ -12,7 +12,6 @@ import { useGetCourseByTypeQuery } from 'src/store/reducers/course';
 
 import CourseCard from '../course-card';
 import CourseSort from '../course-sort';
-import CourseCartWidget from '../course-cart-widget';
 
 // ----------------------------------------------------------------------
 
@@ -41,7 +40,7 @@ export default function CoursesView() {
         </Stack>
         <Button
           component={Link}
-          to={`/courses/${course.id}/add`}
+          to={`/courses/${course.course_type_id}/add`}
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="eva:plus-fill" />}
@@ -60,8 +59,6 @@ export default function CoursesView() {
           </Grid>
         ))}
       </Grid>
-
-      <CourseCartWidget />
     </Container>
   );
 }

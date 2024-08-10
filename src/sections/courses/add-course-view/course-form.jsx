@@ -69,6 +69,7 @@ const CourseForm = () => {
           >
             <input
               type="file"
+              accept="image/*"
               hidden
               ref={fileInputRef}
               onChange={(event) => {

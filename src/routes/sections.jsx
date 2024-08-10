@@ -3,7 +3,6 @@ import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
 import DashboardLayout from 'src/layouts/dashboard';
 
-export const IndexPage = lazy(() => import('src/pages/app'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const LoginPage = lazy(() => import('src/pages/login'));
@@ -31,7 +30,7 @@ export default function Router() {
         </DashboardLayout>
       ),
       children: [
-        { element: <IndexPage />, index: true },
+        { element: <CourseTypePage />, index: true },
         { path: 'user', element: <UserPage /> },
         { path: 'courses', element: <CourseTypePage /> },
         { path: 'courses/:type', element: <CoursesPage /> },

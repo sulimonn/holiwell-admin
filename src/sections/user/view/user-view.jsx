@@ -107,21 +107,20 @@ export default function UserPage() {
 
   return (
     <Container>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">Пользователи</Typography>
-
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-          Добавить
-        </Button>
-      </Stack>
+      <Typography variant="h4">Пользователи</Typography>
 
       <Card>
-        <UserTableToolbar
-          numSelected={selected.length}
-          filterName={filterName}
-          onFilterName={handleFilterByName}
-          onDeleteRow={handleDeleteRow}
-        />
+        <Stack direction="row" alignItems="center" justifyContent="space-between" pr={2}>
+          <UserTableToolbar
+            numSelected={selected.length}
+            filterName={filterName}
+            onFilterName={handleFilterByName}
+            onDeleteRow={handleDeleteRow}
+          />
+          <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+            Добавить
+          </Button>
+        </Stack>
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>

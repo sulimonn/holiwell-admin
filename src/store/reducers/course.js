@@ -54,6 +54,14 @@ const course = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Lesson'],
     }),
+    addLesson: builder.mutation({
+      query: (data) => ({
+        url: '/lessons/create',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Lesson'],
+    }),
   }),
 });
 
@@ -67,6 +75,7 @@ export const {
   useEditLessonMutation,
   useDeleteLessonMutation,
   useAddCourseMutation,
+  useAddLessonMutation,
 } = course;
 
 export default course;

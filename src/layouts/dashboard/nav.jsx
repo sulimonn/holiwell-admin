@@ -160,12 +160,15 @@ function NavItem({ item }) {
             color: item.level === 1 ? 'primary.main' : 'text.primary',
             fontWeight: item.level === 1 ? 'fontWeightSemiBold' : 'fontWeightMedium',
             bgcolor: (theme) =>
-              alpha(item.level === 1 ? theme.palette.primary.main : theme.palette.grey[500], 0.08),
+              alpha(
+                item.level === 1 ? theme.palette.primary.dark : theme.palette.primary.main,
+                0.15
+              ),
             '&:hover': {
               bgcolor: (theme) =>
                 alpha(
-                  item.level === 1 ? theme.palette.primary.main : theme.palette.grey[500],
-                  0.16
+                  item.level === 1 ? theme.palette.primary.dark : theme.palette.primary.main,
+                  0.2
                 ),
             },
           }),
@@ -215,7 +218,7 @@ function NavSub({ open, items }) {
             content: '""',
             position: 'absolute',
             bottom: '30px',
-            backgroundColor: '#EDEFF2',
+            backgroundColor: 'primary.light',
           },
         }}
         disablePadding
@@ -234,7 +237,7 @@ function NavSub({ open, items }) {
                 width: '12px',
                 height: '12px',
                 transform: 'translate(calc(12px * -1), calc(12px * -0.4))',
-                backgroundColor: '#EDEFF2',
+                backgroundColor: 'primary.light',
                 mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23efefef' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E\") 50% 50% / 100% no-repeat",
               },
             }}

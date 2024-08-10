@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 import {
@@ -26,7 +26,6 @@ import {
 
 import LessonCard from '../lesson-card';
 import CourseSort from '../course-sort';
-import CourseFilters from '../course-filters';
 
 const CourseView = () => {
   const { courseId: id } = useParams();
@@ -34,13 +33,9 @@ const CourseView = () => {
   const [editCourse] = useEditCourseMutation();
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation();
   const [course, setCourse] = useState(data);
-  const [openFilter, setOpenFilter] = useState(false);
+
   const fileInputRef = useRef(null);
   const router = useRouter();
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -71,10 +66,6 @@ const CourseView = () => {
     const newDescription = event.target.value;
     setCourse((prevCourse) => ({ ...prevCourse, description: newDescription }));
     debouncedSave('description', newDescription);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
   };
 
   if (!isSuccess || isFetching) {
@@ -183,17 +174,19 @@ const CourseView = () => {
         direction="row"
         alignItems="center"
         flexWrap="wrap-reverse"
-        justifyContent="flex-end"
+        justifyContent="space-between"
         sx={{ mb: 5 }}
       >
-        <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          <CourseFilters
-            openFilter={openFilter}
-            onOpenFilter={handleOpenFilter}
-            onCloseFilter={handleCloseFilter}
-          />
-          <CourseSort />
-        </Stack>
+        <CourseSort />
+        <Button
+          component={Link}
+          to={`/courses/${course.course_type_slug}/${course.id}/add`}
+          variant="contained"
+          color="inherit"
+          startIcon={<Iconify icon="eva:plus-fill" />}
+        >
+          Новый урок
+        </Button>
       </Stack>
       <Grid container spacing={3}>
         {course.lessons &&
@@ -201,30 +194,6 @@ const CourseView = () => {
             <LessonCard
               post={lesson}
               index={index}
-              link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
-            />
-          ))}
-        {course.lessons &&
-          course.lessons.map((lesson, index) => (
-            <LessonCard
-              post={lesson}
-              index={index + 1}
-              link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
-            />
-          ))}
-        {course.lessons &&
-          course.lessons.map((lesson, index) => (
-            <LessonCard
-              post={lesson}
-              index={index + 2}
-              link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
-            />
-          ))}
-        {course.lessons &&
-          course.lessons.map((lesson, index) => (
-            <LessonCard
-              post={lesson}
-              index={index + 3}
               link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
             />
           ))}

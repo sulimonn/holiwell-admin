@@ -1,26 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import { Box, Stack, Container, Typography } from '@mui/material';
 
 import CourseSort from 'src/sections/courses/course-sort';
 import ShopCourseCard from 'src/sections/courses/course-card';
-import CourseFilters from 'src/sections/courses/course-filters';
 
 import { useGetCoursesQuery } from 'src/store/reducers/course';
 
 const CourseTypeView = () => {
   const { data: courses = [], isSuccess } = useGetCoursesQuery();
-
-  const [openFilter, setOpenFilter] = useState(false);
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
-  };
 
   if (!isSuccess) {
     return null;
@@ -40,12 +29,6 @@ const CourseTypeView = () => {
         sx={{ mb: 5 }}
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          <CourseFilters
-            openFilter={openFilter}
-            onOpenFilter={handleOpenFilter}
-            onCloseFilter={handleCloseFilter}
-          />
-
           <CourseSort />
         </Stack>
       </Stack>

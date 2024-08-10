@@ -77,6 +77,7 @@ export default function ShopCourseCard({ course, link }) {
           variant="body2"
           sx={{
             color: 'text.secondary',
+            whiteSpace: 'nowrap',
           }}
         >
           {course.lessons.length} {getLessonWord(course.lessons.length)}
