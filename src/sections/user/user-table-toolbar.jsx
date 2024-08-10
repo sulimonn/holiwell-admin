@@ -11,7 +11,7 @@ import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function UserTableToolbar({ numSelected, filterName, onFilterName }) {
+export default function UserTableToolbar({ numSelected, filterName, onFilterName, onDeleteRow }) {
   return (
     <Toolbar
       sx={{
@@ -27,7 +27,7 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
     >
       {numSelected > 0 ? (
         <Typography component="div" variant="subtitle1">
-          {numSelected} selected
+          {numSelected} выбрано
         </Typography>
       ) : (
         <OutlinedInput
@@ -45,16 +45,10 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
         />
       )}
 
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
+      {numSelected > 0 && (
+        <Tooltip title="Удалить">
+          <IconButton onClick={onDeleteRow}>
             <Iconify icon="eva:trash-2-fill" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <Iconify icon="ic:round-filter-list" />
           </IconButton>
         </Tooltip>
       )}
@@ -66,4 +60,5 @@ UserTableToolbar.propTypes = {
   numSelected: PropTypes.number,
   filterName: PropTypes.string,
   onFilterName: PropTypes.func,
+  onDeleteRow: PropTypes.func,
 };

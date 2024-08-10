@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-import { Box, Card } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
+import { Box, Card, Button } from '@mui/material';
+
+import Iconify from 'src/components/iconify';
 
 import TableNoData from 'src/sections/user/table-no-data';
 import UserTableToolbar from 'src/sections/user/user-table-toolbar';
@@ -30,7 +33,22 @@ const TrainersView = () => {
 
   return (
     <Card sx={{ pb: 3 }}>
-      <UserTableToolbar filterName={filterName} onFilterName={handleFilterByName} />
+      <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
+        <UserTableToolbar
+          filterName={filterName}
+          onFilterName={handleFilterByName}
+          filter={false}
+        />
+        <Button
+          component={Link}
+          to="/trainers/add"
+          variant="contained"
+          color="inherit"
+          startIcon={<Iconify icon="eva:plus-fill" />}
+        >
+          Новый тренер
+        </Button>
+      </Box>
       <Box px={3}>
         <Grid container spacing={3}>
           {dataFiltered.map((trainer) => (

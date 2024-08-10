@@ -79,6 +79,7 @@ const navConfig = [
   {
     title: 'Тренеры',
     path: '/trainers',
+    icon: icon('ic_trainers'),
     level: 1,
   },
 ];

@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { useAllUsersQuery } from 'src/store/reducers/users';
+import { useAllUsersQuery, useDeleteUserMutation } from 'src/store/reducers/users';
 
 // eslint-disable-next-line perfectionist/sort-imports
 import Iconify from 'src/components/iconify';
@@ -27,6 +27,7 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 
 export default function UserPage() {
   const { data: users = [] } = useAllUsersQuery();
+  const [deleteUser] = useDeleteUserMutation();
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -88,6 +89,14 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
+  const handleDeleteRow = async () => {
+    console.log(selected);
+    selected.forEach(async (id) => {
+      console.log(id);
+      await deleteUser(id);
+    });
+  };
+
   const dataFiltered = applyFilter({
     inputData: users,
     comparator: getComparator(order, orderBy),
@@ -111,6 +120,7 @@ export default function UserPage() {
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
+          onDeleteRow={handleDeleteRow}
         />
 
         <Scrollbar>

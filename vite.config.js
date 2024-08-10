@@ -33,7 +33,6 @@ export default defineConfig({
         target: 'http://154.194.52.246:8000/api',
         changeOrigin: true,
         rewrite: (path) => {
-          console.log(path);
           return path.replace(/^\/api/, '');
         },
       },
@@ -41,7 +40,6 @@ export default defineConfig({
         target: 'http://154.194.52.246:8000/auth',
         changeOrigin: true,
         rewrite: (path) => {
-          console.log(path);
           return path.replace(/^\/auth/, '');
         },
       },

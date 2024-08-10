@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
+import { Button } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
+import Iconify from 'src/components/iconify';
+
 import { useGetCourseByTypeQuery } from 'src/store/reducers/course';
 
 import CourseCard from '../course-card';
 import CourseSort from '../course-sort';
-import CourseFilters from '../course-filters';
 import CourseCartWidget from '../course-cart-widget';
 
 // ----------------------------------------------------------------------
@@ -18,15 +19,6 @@ import CourseCartWidget from '../course-cart-widget';
 export default function CoursesView() {
   const { type } = useParams();
   const { data: course = {}, isSuccess } = useGetCourseByTypeQuery(type);
-  const [openFilter, setOpenFilter] = useState(false);
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
-  };
 
   if (!isSuccess) {
     return null;
@@ -41,18 +33,21 @@ export default function CoursesView() {
         direction="row"
         alignItems="center"
         flexWrap="wrap-reverse"
-        justifyContent="flex-end"
+        justifyContent="space-between"
         sx={{ mb: 5 }}
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          <CourseFilters
-            openFilter={openFilter}
-            onOpenFilter={handleOpenFilter}
-            onCloseFilter={handleCloseFilter}
-          />
-
           <CourseSort />
         </Stack>
+        <Button
+          component={Link}
+          to={`/courses/${course.id}/add`}
+          variant="contained"
+          color="inherit"
+          startIcon={<Iconify icon="eva:plus-fill" />}
+        >
+          Новый курс
+        </Button>
       </Stack>
 
       <Grid container spacing={3}>

@@ -11,10 +11,14 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 
+import { useDeleteTrainerMutation } from 'src/store/reducers/trainers';
+
 // ----------------------------------------------------------------------
 
 export default function TrainerCard({ trainer }) {
+  const [deleteTrainer, { isLoading }] = useDeleteTrainerMutation();
   const {
+    id,
     path_to_background: cover,
     path_to_avatar: avatarUrl,
     first_name: firstName,
@@ -30,8 +34,8 @@ export default function TrainerCard({ trainer }) {
         width: 90,
         height: 90,
         position: 'absolute',
-        left: (theme) => theme.spacing(9.8),
-        bottom: (theme) => theme.spacing(-4.1),
+        left: (theme) => theme.spacing(9),
+        bottom: (theme) => theme.spacing(-5),
       }}
     />
   );
@@ -77,13 +81,13 @@ export default function TrainerCard({ trainer }) {
       color="paper"
       src="/assets/icons/shape-avatar.svg"
       sx={{
-        width: 245,
-        height: 130,
+        width: 230,
+        height: 127,
         zIndex: 9,
         bottom: -56,
         position: 'absolute',
         color: 'background.paper',
-        objectFit: 'contain',
+        objectFit: 'cover',
       }}
     />
   );
@@ -99,6 +103,10 @@ export default function TrainerCard({ trainer }) {
           backgroundColor: 'grey.500',
         },
       }}
+      onClick={async () => {
+        await deleteTrainer(id);
+      }}
+      disabled={isLoading}
     >
       <Iconify icon="carbon:trash-can" />
     </IconButton>

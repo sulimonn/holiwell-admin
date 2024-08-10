@@ -48,7 +48,7 @@ export default function UserTableRow({
 
   return (
     <>
-      <TableRow hover tabIndex={-1} lastName="checkbox" selected={selected}>
+      <TableRow hover tabIndex={-1} key="checkbox" selected={selected}>
         <TableCell padding="checkbox">
           <Checkbox disableRipple checked={selected} onChange={handleClick} />
         </TableCell>
@@ -118,5 +118,5 @@ UserTableRow.propTypes = {
   firstName: PropTypes.any,
   lastName: PropTypes.any,
   selected: PropTypes.any,
-  status: PropTypes.string,
+  status: PropTypes.any,
 };

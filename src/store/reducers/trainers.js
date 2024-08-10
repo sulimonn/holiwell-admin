@@ -25,6 +25,14 @@ const trainers = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Trainers'],
     }),
+    addTrainer: builder.mutation({
+      query: (data) => ({
+        url: '/trainers/create',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Trainers'],
+    }),
   }),
 });
 
@@ -33,6 +41,7 @@ export const {
   useGetTrainerQuery,
   useEditTrainerMutation,
   useDeleteTrainerMutation,
+  useAddTrainerMutation,
 } = trainers;
 
 export default trainers;

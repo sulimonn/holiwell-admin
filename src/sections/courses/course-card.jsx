@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -95,9 +94,9 @@ export default function ShopCourseCard({ course, link }) {
         </Box>
 
         <Stack spacing={2} sx={{ p: 3 }}>
-          <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
+          <Typography color="inherit" variant="subtitle2" noWrap>
             {course.title}
-          </Link>
+          </Typography>
 
           {/* <Stack direction="row" alignItems="center" justifyContent="space-between">
           {renderPrice}
