@@ -50,15 +50,13 @@ const navConfig = [
         title: 'Слушай',
         path: '/courses/listening',
         level: 2,
-        children: listening?.courses
-          ? [
-              ...listening.courses.map((item) => ({
-                ...item,
-                path: `/courses/listening/${item.id}`,
-                level: 3,
-              })),
-            ]
-          : null,
+        children: listening?.courses && [
+          ...listening.courses.map((item) => ({
+            ...item,
+            path: `/courses/listening/${item.id}`,
+            level: 3,
+          })),
+        ],
       },
       {
         title: 'Медитируй',
@@ -80,6 +78,12 @@ const navConfig = [
     title: 'Тренеры',
     path: '/trainers',
     icon: icon('ic_trainers'),
+    level: 1,
+  },
+  {
+    title: 'Еще',
+    path: '/more',
+    icon: icon('ic_settings'),
     level: 1,
   },
 ];

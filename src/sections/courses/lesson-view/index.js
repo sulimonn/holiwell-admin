@@ -1,1 +1,1 @@
-export { default as LessonView } from './lesson-view';
+export { default as LessonView } from './lesson';

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
@@ -56,7 +57,14 @@ export default function UserTableRow({
         <TableCell component="th" scope="row" padding="none">
           <Stack direction="row" alignItems="center" spacing={2}>
             <Avatar alt={firstName} src={avatarUrl} />
-            <Typography variant="subtitle2" noWrap>
+            <Typography
+              variant="subtitle2"
+              sx={{ textDecoration: 'none' }}
+              color="primary"
+              noWrap
+              component={Link}
+              to={`/user/${id}`}
+            >
               {firstName} {lastName}
             </Typography>
           </Stack>

@@ -9,22 +9,22 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
+import { useRouter } from 'src/routes/hooks';
+
 import { useAuth } from 'src/contexts';
 
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
   {
-    label: 'Home',
+    label: 'Домой',
     icon: 'eva:home-fill',
+    to: '/',
   },
   {
-    label: 'Profile',
+    label: 'Профиль',
     icon: 'eva:person-fill',
-  },
-  {
-    label: 'Settings',
-    icon: 'eva:settings-2-fill',
+    to: '/user/me',
   },
 ];
 
@@ -33,6 +33,7 @@ const MENU_OPTIONS = [
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
   const { user: account, logout } = useAuth();
+  const router = useRouter();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -99,7 +100,13 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         {MENU_OPTIONS.map((option) => (
-          <MenuItem key={option.label} onClick={handleClose}>
+          <MenuItem
+            key={option.label}
+            onClick={() => {
+              handleClose();
+              router.push(option.to);
+            }}
+          >
             {option.label}
           </MenuItem>
         ))}
@@ -117,7 +124,7 @@ export default function AccountPopover() {
           }}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
-          Logout
+          Выйти
         </MenuItem>
       </Popover>
     </>

@@ -68,8 +68,10 @@ export default function LoginView() {
 
             setStatus({ success: false });
           }
+          console.log(response);
+
           if (!response) {
-            router.push('/dashboard', { replace: true });
+            router.push('/', { replace: true });
           }
         } catch (err) {
           console.error(err);
@@ -201,7 +203,7 @@ export default function LoginView() {
           }}
         >
           <Typography variant="h4" mb={2}>
-            Sign in to Holiwell Admin
+            Войти в Holiwell Admin
           </Typography>
 
           {renderForm}

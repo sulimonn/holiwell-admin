@@ -19,7 +19,7 @@ export default function LessonCard({ post, index, link }) {
 
   const latestPost = index === 1 || index === 2;
 
-  const renderAvatar = (
+  const renderAvatar = trainer && (
     <Box
       display="flex"
       gap={1}

@@ -9,6 +9,7 @@ import {
   Container,
   TextField,
   IconButton,
+  InputAdornment,
   Unstable_Grid2 as Grid,
 } from '@mui/material';
 
@@ -24,6 +25,7 @@ import {
   useDeleteCourseMutation,
 } from 'src/store/reducers/course';
 
+import AudioInput from '../audio';
 import LessonCard from '../lesson-card';
 import CourseSort from '../course-sort';
 
@@ -36,6 +38,20 @@ const CourseView = () => {
 
   const fileInputRef = useRef(null);
   const router = useRouter();
+
+  const handleMediaChange = async (file) => {
+    if (file) {
+      const formData = new FormData();
+      formData.append('cover_audio', file);
+      const response = await editCourse({ id, data: formData });
+      if (!response?.data) {
+        setCourse((prevLesson) => ({
+          ...prevLesson,
+          [`path_to_url_audio`]: URL.createObjectURL(file),
+        }));
+      }
+    }
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -68,6 +84,11 @@ const CourseView = () => {
     debouncedSave('description', newDescription);
   };
 
+  const handlePriceChange = (event) => {
+    const newPrice = event.target.value;
+    setCourse((prevCourse) => ({ ...prevCourse, price_cource: newPrice }));
+    debouncedSave('price_cource', newPrice);
+  };
   if (!isSuccess || isFetching) {
     return null;
   }
@@ -154,14 +175,14 @@ const CourseView = () => {
         <TextField
           variant="standard"
           label="Название курса"
-          value={course.title}
+          value={course.title || ''}
           inputProps={{ sx: { fontSize: { xs: 18, sm: 24 }, fontWeight: 'bold' } }}
           onChange={handleTitleChange}
         />
         <TextField
           variant="standard"
           label="Описание курса"
-          value={course.description}
+          value={course.description || ''}
           multiline
           rows={4}
           inputProps={{
@@ -169,6 +190,30 @@ const CourseView = () => {
           }}
           onChange={handleDescriptionChange}
         />
+        <TextField
+          variant="standard"
+          label="Цена"
+          value={course?.price_cource || ''}
+          name="price_cource"
+          onChange={handlePriceChange}
+          type="number"
+          InputProps={{
+            endAdornment: <InputAdornment position="end">₽</InputAdornment>,
+          }}
+          min="0"
+          sx={{
+            mb: 2,
+          }}
+        />
+
+        {course.course_type_slug === 'training' && (
+          <AudioInput
+            path_to_audio={course.path_to_url_audio}
+            setPathToAudio={(file) => {
+              handleMediaChange(file);
+            }}
+          />
+        )}
       </Box>
       <Stack
         direction="row"
@@ -192,6 +237,7 @@ const CourseView = () => {
         {course.lessons &&
           course.lessons.map((lesson, index) => (
             <LessonCard
+              key={lesson.id}
               post={lesson}
               index={index}
               link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}

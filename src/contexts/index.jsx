@@ -11,7 +11,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState('loading');
+  const [isAuthenticated, setIsAuthenticated] = useState();
   const [user, setUser] = useState(null);
   const [login] = useLoginMutation();
   const {
@@ -28,26 +28,36 @@ const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
+    // Check if there is no auth token, redirect immediately
     if (!localStorage.getItem('authToken')) {
-      console.log('no token');
       router.push('/login');
+      return;
     }
+
+    // If still fetching or loading, do not perform any redirection yet
+    if (isFetching || isLoading) {
+      return;
+    }
+
     if (userData) {
       setUser(userData);
       setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-      setUser(null);
+      if (userData.is_superuser) {
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        router.push('/login');
+      }
     }
-  }, [userData, router]);
+  }, [userData, isFetching, isLoading, router]);
 
   const handleLogin = useCallback(
     async (credentials) => {
       try {
         const { access_token } = await login(credentials).unwrap();
         localStorage.setItem('authToken', access_token);
-        const { data } = await refetch();
-        setUser(() => data);
         setIsAuthenticated(true);
         return null;
       } catch (error) {
@@ -56,7 +66,7 @@ const AuthProvider = ({ children }) => {
         return error;
       }
     },
-    [login, refetch]
+    [login]
   );
 
   const handleLogout = useCallback(async () => {

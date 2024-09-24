@@ -1,21 +1,37 @@
-import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import React, { useRef, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 
-import { Box, alpha, Button, Container, TextField, IconButton } from '@mui/material';
+import {
+  Box,
+  alpha,
+  Button,
+  Container,
+  TextField,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
+} from '@mui/material';
 
 import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 
+import { toggleSnackbar } from 'src/store/reducers/snackbar';
 import { useAddCourseMutation } from 'src/store/reducers/course';
 
+import AudioInput from '../audio';
+
 const CourseForm = () => {
-  const { id } = useParams();
+  const { type } = useParams();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get('course_id');
   const router = useRouter();
   const [addCourse, { isLoading }] = useAddCourseMutation();
   const [course, setCourse] = useState({});
   const [cover, setCover] = useState();
   const fileInputRef = useRef(null);
+  const dispatch = useDispatch();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,10 +40,15 @@ const CourseForm = () => {
       formData.append(key, course[key]);
     });
     formData.append('course_type_id', id);
+    formData.append('price_cource', id);
     const response = await addCourse(formData);
-    if (!response?.data) {
+
+    if (!response?.data && !response?.error) {
       setCourse({});
-      router.push('/courses');
+      router.push(`/courses/${type}`);
+      dispatch(toggleSnackbar({ message: 'Курс добавлен', type: 'success' }));
+    } else {
+      dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
     }
   };
 
@@ -103,15 +124,44 @@ const CourseForm = () => {
           }}
           name="description"
         />
+        <TextField
+          variant="standard"
+          label="Цена"
+          value={course?.price_cource || ''}
+          name="price_cource"
+          onChange={(event) => setCourse({ ...course, price_cource: event.target.value })}
+          type="number"
+          InputProps={{
+            endAdornment: <InputAdornment position="end">₽</InputAdornment>,
+          }}
+          min="0"
+          sx={{
+            mb: 2,
+          }}
+        />
+
+        {type === 'training' && (
+          <AudioInput
+            path_to_audio={course?.cover_audio}
+            setPathToAudio={(path) => setCourse({ ...course, cover_audio: path })}
+          />
+        )}
       </Box>
       <Button
         type="submit"
         variant="contained"
         sx={{ mt: 3, width: '100%' }}
         onClick={handleSubmit}
-        disabled={!course?.title || !course?.description || !course?.cover || isLoading}
+        disabled={
+          !course?.title ||
+          !course?.description ||
+          !course?.cover ||
+          !course?.price_cource ||
+          !course?.cover_audio ||
+          isLoading
+        }
       >
-        Сохранить
+        Сохранить {isLoading && <CircularProgress sx={{ ml: 1 }} size={15} />}
       </Button>
     </Container>
   );

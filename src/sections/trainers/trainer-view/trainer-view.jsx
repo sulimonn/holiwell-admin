@@ -107,7 +107,6 @@ const TrainerView = () => {
                   }));
                 }
               }}
-              onClick={(event) => event.stopPropagation()}
             />
             <Iconify icon="eva:camera-fill" sx={{ width: 32, height: 32, color: 'white' }} />
           </IconButton>
@@ -161,7 +160,6 @@ const TrainerView = () => {
                   }));
                 }
               }}
-              onClick={(event) => event.stopPropagation()}
             />
             <Iconify icon="eva:camera-fill" sx={{ width: 32, height: 32, color: 'white' }} />
           </IconButton>

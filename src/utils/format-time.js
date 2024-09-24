@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { format, getTime, formatDistanceToNow } from 'date-fns';
 
 // ----------------------------------------------------------------------
@@ -24,4 +25,25 @@ export function fToNow(date) {
         addSuffix: true,
       })
     : '';
+}
+
+export function formatDuration(duration) {
+  const hours = Math.floor(duration / 3600);
+  const minutes = Math.floor((duration % 3600) / 60);
+  const seconds = Math.floor(duration % 60);
+
+  return `${hours > 0 ? `${hours}:` : ''}${hours > 0 && minutes < 10 ? '0' : ''}${minutes}:${
+    seconds < 10 ? '0' : ''
+  }${seconds}`;
+}
+
+export function timeToSeconds(time) {
+  if (typeof time === 'number') return time;
+  if (!time) return 0;
+  const parts = time.split(':');
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  const seconds = parseInt(parts[2], 10);
+
+  return hours * 3600 + minutes * 60 + seconds;
 }

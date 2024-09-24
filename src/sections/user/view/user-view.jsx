@@ -10,6 +10,8 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
+import { useAuth } from 'src/contexts';
+
 import { useAllUsersQuery, useDeleteUserMutation } from 'src/store/reducers/users';
 
 // eslint-disable-next-line perfectionist/sort-imports
@@ -26,6 +28,7 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+  const { user } = useAuth();
   const { data: users = [] } = useAllUsersQuery();
   const [deleteUser] = useDeleteUserMutation();
   const [page, setPage] = useState(0);
@@ -38,7 +41,7 @@ export default function UserPage() {
 
   const [filterName, setFilterName] = useState('');
 
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -90,9 +93,7 @@ export default function UserPage() {
   };
 
   const handleDeleteRow = async () => {
-    console.log(selected);
     selected.forEach(async (id) => {
-      console.log(id);
       await deleteUser(id);
     });
   };
@@ -143,20 +144,23 @@ export default function UserPage() {
               <TableBody>
                 {dataFiltered
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      id={row.id}
-                      firstName={row.first_name}
-                      lastName={row.last_name}
-                      email={row.email}
-                      status={row.is_active}
-                      avatarUrl={row.path_to_avatar}
-                      isSuperUser={row.is_superuser}
-                      selected={selected.indexOf(row.id) !== -1}
-                      handleClick={(event) => handleClick(event, row.id)}
-                    />
-                  ))}
+                  .map(
+                    (row) =>
+                      row.id !== user.id && (
+                        <UserTableRow
+                          key={row.id}
+                          id={row.id}
+                          firstName={row.first_name}
+                          lastName={row.last_name}
+                          email={row.email}
+                          status={row.is_active}
+                          avatarUrl={row.path_to_avatar}
+                          isSuperUser={row.is_superuser}
+                          selected={selected.indexOf(row.id) !== -1}
+                          handleClick={(event) => handleClick(event, row.id)}
+                        />
+                      )
+                  )}
 
                 <TableEmptyRows
                   height={77}
@@ -175,7 +179,7 @@ export default function UserPage() {
           count={users.length}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[10, 25]}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>

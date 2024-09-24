@@ -40,7 +40,7 @@ export default function CoursesView() {
         </Stack>
         <Button
           component={Link}
-          to={`/courses/${course.course_type_id}/add`}
+          to={`/courses/${course.slug}/add?course_id=${course.id}`}
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="eva:plus-fill" />}

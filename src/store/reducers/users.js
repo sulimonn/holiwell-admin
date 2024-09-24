@@ -35,12 +35,16 @@ const user = apiSlice.injectEndpoints({
       invalidatesTags: ['User'],
     }),
     editUser: builder.mutation({
-      query: (data) => ({
-        url: `/users/${data.id}`,
+      query: ({ data, id }) => ({
+        url: `/users/${id}`,
         method: 'PATCH',
         body: data,
       }),
       invalidatesTags: ['User'],
+    }),
+    getUser: builder.query({
+      query: (id) => `/users/${id}`,
+      providesTags: ['User'],
     }),
   }),
 });
@@ -52,6 +56,7 @@ export const {
   useAllUsersQuery,
   useDeleteUserMutation,
   useEditUserMutation,
+  useGetUserQuery,
 } = user;
 
 export default user;

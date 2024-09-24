@@ -35,6 +35,7 @@ const course = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: ['Courses'],
     }),
     getLesson: builder.query({
       query: (id) => `/lessons/${id}`,
@@ -46,6 +47,7 @@ const course = apiSlice.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
+      invalidatesTags: ['Lesson'],
     }),
     deleteLesson: builder.mutation({
       query: (id) => ({

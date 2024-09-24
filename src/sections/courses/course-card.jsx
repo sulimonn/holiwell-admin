@@ -8,27 +8,9 @@ import Typography from '@mui/material/Typography';
 
 import { fCurrency, getLessonWord } from 'src/utils/format-number';
 
-import Label from 'src/components/label';
-
 // ----------------------------------------------------------------------
 
 export default function ShopCourseCard({ course, link }) {
-  const renderStatus = (
-    <Label
-      variant="filled"
-      color={(course.status === 'sale' && 'error') || 'info'}
-      sx={{
-        zIndex: 9,
-        top: 16,
-        right: 16,
-        position: 'absolute',
-        textTransform: 'uppercase',
-      }}
-    >
-      {course.status}
-    </Label>
-  );
-
   const renderImg = (
     <Box
       component="img"
@@ -88,11 +70,7 @@ export default function ShopCourseCard({ course, link }) {
   return (
     <Box component={RouterLink} to={link} style={{ textDecoration: 'none' }}>
       <Card sx={{ height: '100%' }}>
-        <Box sx={{ pt: '100%', position: 'relative' }}>
-          {course.status && renderStatus}
-
-          {renderImg}
-        </Box>
+        <Box sx={{ pt: '100%', position: 'relative' }}>{renderImg}</Box>
 
         <Stack spacing={2} sx={{ p: 3 }}>
           <Typography color="inherit" variant="subtitle2" noWrap>

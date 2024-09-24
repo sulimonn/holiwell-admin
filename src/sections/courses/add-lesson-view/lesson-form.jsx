@@ -1,4 +1,6 @@
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -10,7 +12,6 @@ import {
   Container,
   TextField,
   InputLabel,
-  Typography,
   IconButton,
   FormControl,
 } from '@mui/material';
@@ -19,46 +20,89 @@ import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 
-import { useAddLessonMutation } from 'src/store/reducers/course';
+import { toggleSnackbar } from 'src/store/reducers/snackbar';
 import { useGetTrainersQuery } from 'src/store/reducers/trainers';
+import { useAddLessonMutation, useEditLessonMutation } from 'src/store/reducers/course';
 
-const LessonForm = () => {
+import Audio from '../audio';
+
+const LessonForm = ({ lessonId, data }) => {
+  const dispatch = useDispatch();
   const { type, courseId: id } = useParams();
-  const [lesson, setLesson] = useState();
-  const [cover, setCover] = useState();
-  const [video, setVideo] = useState();
-  const [audio, setAudio] = useState();
+  const [lesson, setLesson] = useState({
+    ...data,
+    trainer_id: data?.trainer.id,
+    cover: data?.path_to_cover,
+    video: data?.path_to_video,
+    audio: data?.path_to_audio,
+  });
+  const [cover, setCover] = useState(data?.path_to_cover);
+  const [video, setVideo] = useState(data?.path_to_video);
+  React.useEffect(() => {
+    if (data) {
+      setLesson({
+        ...data,
+        trainer_id: data?.trainer.id,
+        cover: data?.path_to_cover,
+        video: data?.path_to_video,
+        audio: data?.path_to_audio,
+      });
+      setCover(data?.path_to_cover);
+      setVideo(data?.path_to_video);
+    }
+  }, [data]);
+
   const fileInputRef = React.useRef(null);
   const videoInputRef = React.useRef(null);
-  const audioInputRef = React.useRef(null);
   const router = useRouter();
   const { data: trainers, isSuccess } = useGetTrainersQuery();
 
   const [addLesson, { isLoading }] = useAddLessonMutation();
-
-  console.log(video);
+  const [editLesson, { isLoading: isEditing }] = useEditLessonMutation();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
     Object.keys(lesson).forEach((key) => {
-      formData.append(key, lesson[key]);
+      if (key === 'cover' || key === 'video' || key === 'audio') {
+        if (typeof lesson[key] !== 'string') {
+          formData.append(key, lesson[key]);
+        }
+      } else if (!key.startsWith('path_to')) {
+        formData.append(key, lesson[key]);
+      }
     });
     formData.append('course_id', id);
-    const response = await addLesson(formData);
-    if (!response?.data) {
-      setLesson({});
-      router.push(`/courses/${type}/${id}`);
+    console.log({ ...formData });
+
+    if (lessonId) {
+      const response = await editLesson({ id: lessonId, data: formData });
+      if (!response?.error) {
+        setLesson({});
+        router.push(`/courses/${type}/${id}`);
+        dispatch(toggleSnackbar({ message: 'Изменения сохранены', type: 'success' }));
+      } else {
+        dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
+      }
+    } else {
+      const response = await addLesson(formData);
+      if (!response?.error) {
+        setLesson({});
+        router.push(`/courses/${type}/${id}`);
+        dispatch(toggleSnackbar({ message: 'Урок добавлен', type: 'success' }));
+      } else {
+        dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
+      }
     }
   };
-  console.log(type);
 
   if (!isSuccess) {
     return null;
   }
+  console.log(video);
 
   return (
-    <Container>
+    <Container component="form" onSubmit={handleSubmit}>
       <Box width="100%" height={{ xs: 300, md: 500 }} overflow="hidden" position="relative">
         {cover && (
           <Box
@@ -99,6 +143,7 @@ const LessonForm = () => {
               type="file"
               accept="image/*"
               hidden
+              name="cover"
               ref={fileInputRef}
               onChange={(event) => {
                 const file = event.target.files[0];
@@ -114,6 +159,7 @@ const LessonForm = () => {
         <TextField
           variant="standard"
           label="Название урока"
+          required
           value={lesson?.title}
           inputProps={{ sx: { fontSize: { xs: 18, sm: 24 }, fontWeight: 'bold' } }}
           onChange={(event) => setLesson({ ...lesson, title: event.target.value })}
@@ -124,6 +170,7 @@ const LessonForm = () => {
           value={lesson?.description}
           multiline
           rows={4}
+          required
           inputProps={{
             sx: { fontSize: { xs: 15, sm: 22 }, fontWeight: '400', lineHeight: 1.2 },
           }}
@@ -132,10 +179,11 @@ const LessonForm = () => {
         <FormControl fullWidth>
           <InputLabel id="trainer_id_label">Тренер</InputLabel>
           <Select
+            variant="standard"
             id="trainer_id"
             labelId="trainer_id_label"
             label="Тренер"
-            value={lesson?.trainer_id || ''}
+            value={lesson?.trainer_id || lesson?.trainer.id || ''}
             onChange={(event) => setLesson({ ...lesson, trainer_id: event.target.value })}
           >
             {trainers?.map((trainer) => (
@@ -190,8 +238,9 @@ const LessonForm = () => {
               >
                 <input
                   type="file"
-                  accept="video/*"
+                  accept="video/mp4"
                   hidden
+                  name="video"
                   ref={videoInputRef}
                   onChange={(event) => {
                     const file = event.target.files[0];
@@ -204,77 +253,13 @@ const LessonForm = () => {
             </Box>
           </Box>
         )}
+
         {(type === 'listening' || type === 'training') && (
-          <Box>
-            <Typography variant="body1" color="text.secondary">
-              Аудио
-            </Typography>
-            <Box
-              width="100%"
-              height={{ xs: 50, md: 60 }}
-              mb={2}
-              mt={1}
-              overflow="hidden"
-              position="relative"
-              display="flex"
-            >
-              {audio && (
-                <Box
-                  component="audio"
-                  alt={type}
-                  src={audio}
-                  controls
-                  sx={{
-                    pl: { xs: 4, sm: 5 },
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                />
-              )}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none',
-                  justifyContent: 'flex-start',
-                  borderRadius: '50px',
-                  border: '2px solid',
-                  borderColor: (theme) => theme.palette.grey[500],
-                  color: (theme) => theme.palette.getContrastText(theme.palette.grey[900]),
-                }}
-              >
-                <IconButton
-                  variant="contained"
-                  size="large"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    audioInputRef.current.click();
-                  }}
-                  sx={{ p: 2, pointerEvents: 'auto' }}
-                  color="primary"
-                >
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    hidden
-                    ref={audioInputRef}
-                    onChange={(event) => {
-                      const file = event.target.files[0];
-                      setLesson({ ...lesson, audio: file });
-                      setAudio(URL.createObjectURL(file));
-                    }}
-                  />
-                  <Iconify
-                    icon="eva:download-fill"
-                    sx={{ width: { xs: 25, sm: 32 }, height: { xs: 25, sm: 32 } }}
-                  />
-                </IconButton>
-              </Box>
-            </Box>
-          </Box>
+          <Audio
+            path_to_audio={data?.path_to_audio}
+            setPathToAudio={(path) => setLesson({ ...lesson, audio: path })}
+            audio_length={data?.audio_length}
+          />
         )}
       </Box>
 
@@ -282,13 +267,26 @@ const LessonForm = () => {
         type="submit"
         variant="contained"
         sx={{ mt: 3, width: '100%' }}
-        onClick={handleSubmit}
-        disabled={!lesson?.title || !lesson?.description || !lesson?.cover || isLoading}
+        disabled={
+          !lesson?.title ||
+          !lesson?.description ||
+          !lesson?.cover ||
+          isLoading ||
+          !lesson?.trainer_id ||
+          ((type === 'meditation' || type === 'training') && !lesson?.video) ||
+          ((type === 'listening' || type === 'training') && !lesson?.audio) ||
+          isEditing
+        }
       >
         Сохранить
       </Button>
     </Container>
   );
+};
+
+LessonForm.propTypes = {
+  lessonId: PropTypes.number,
+  data: PropTypes.object,
 };
 
 export default LessonForm;

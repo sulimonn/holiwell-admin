@@ -53,7 +53,11 @@ export default function Nav({ openNav, onCloseNav }) {
         borderRadius: 1.5,
         alignItems: 'center',
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
+        color: 'inherit',
+        textDecoration: 'none',
       }}
+      component={RouterLink}
+      to="/user/me"
     >
       <Avatar src={user.path_to_avatar} alt="photoURL" />
 
