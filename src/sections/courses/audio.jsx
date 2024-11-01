@@ -1,13 +1,18 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
-import { Box, Slider, IconButton, Typography } from '@mui/material';
+import { Box, Slider, IconButton, Typography, CircularProgress } from '@mui/material';
 
 import { timeToSeconds, formatDuration } from 'src/utils/format-time';
 
 import Iconify from 'src/components/iconify';
 
-const AudioInput = ({ path_to_audio, setPathToAudio, audio_length = '00:00:00' }) => {
+const AudioInput = ({
+  path_to_audio,
+  setPathToAudio,
+  audio_length = '00:00:00',
+  audioLoading = false,
+}) => {
   const [audio, setAudio] = useState(path_to_audio);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -37,6 +42,10 @@ const AudioInput = ({ path_to_audio, setPathToAudio, audio_length = '00:00:00' }
     };
   }, [audio]);
 
+  React.useEffect(() => {
+    setAudio(path_to_audio);
+  }, [path_to_audio]);
+
   const handlePlayAudio = () => {
     if (audio) {
       // Toggle between play and pause
@@ -64,6 +73,37 @@ const AudioInput = ({ path_to_audio, setPathToAudio, audio_length = '00:00:00' }
         Аудио
       </Typography>
       <Box width="100%" height={{ xs: 50, md: 60 }} mb={2} mt={1} overflow="hidden" display="flex">
+        <IconButton
+          variant="contained"
+          size="large"
+          onClick={(event) => {
+            event.stopPropagation();
+            audioInputRef.current.click();
+          }}
+          sx={{ pointerEvents: 'auto' }}
+          color="primary"
+        >
+          <input
+            type="file"
+            accept="audio/mp3,audio/mpeg,audio/wav"
+            hidden
+            name="audio"
+            ref={audioInputRef}
+            onChange={(event) => {
+              const file = event.target.files[0];
+              setPathToAudio(file);
+              setAudio(URL.createObjectURL(file));
+            }}
+          />
+          {audioLoading ? (
+            <CircularProgress size={28} color="primary" />
+          ) : (
+            <Iconify
+              icon="eva:download-fill"
+              sx={{ width: { xs: 25, sm: 28 }, height: { xs: 25, sm: 28 } }}
+            />
+          )}
+        </IconButton>
         <Box
           sx={{
             display: 'flex',
@@ -71,38 +111,11 @@ const AudioInput = ({ path_to_audio, setPathToAudio, audio_length = '00:00:00' }
             justifyContent: 'flex-start',
             borderRadius: '50px',
             width: '100%',
-            border: '2px solid',
-            borderColor: (theme) => theme.palette.grey[500],
+            border: '1px solid',
+            borderColor: 'primary.main',
             color: (theme) => theme.palette.getContrastText(theme.palette.grey[900]),
           }}
         >
-          <IconButton
-            variant="contained"
-            size="large"
-            onClick={(event) => {
-              event.stopPropagation();
-              audioInputRef.current.click();
-            }}
-            sx={{ pointerEvents: 'auto' }}
-            color="primary"
-          >
-            <input
-              type="file"
-              accept="audio/*"
-              hidden
-              name="audio"
-              ref={audioInputRef}
-              onChange={(event) => {
-                const file = event.target.files[0];
-                setPathToAudio(file);
-                setAudio(URL.createObjectURL(file));
-              }}
-            />
-            <Iconify
-              icon="eva:download-fill"
-              sx={{ width: { xs: 25, sm: 28 }, height: { xs: 25, sm: 28 } }}
-            />
-          </IconButton>
           <IconButton variant="contained" size="large" onClick={handlePlayAudio} color="primary">
             <Iconify
               icon={playing ? 'eva:pause-circle-outline' : 'eva:arrow-right-outline'}
@@ -116,10 +129,26 @@ const AudioInput = ({ path_to_audio, setPathToAudio, audio_length = '00:00:00' }
             aria-labelledby="audio-slider"
             sx={{ width: '100%' }}
           />
-          <Typography variant="subtitle2" component="span" color="text.secondary">
-            {formatDuration(currentTime)}/{formatDuration(duration)}
+          <Typography variant="subtitle2" component="span" color="text.primary" sx={{ mx: 1 }}>
+            {formatDuration(currentTime)}/{formatDuration(path_to_audio ? duration : 0)}
           </Typography>
         </Box>
+        <IconButton
+          variant="contained"
+          size="large"
+          onClick={(event) => {
+            event.stopPropagation();
+            setPathToAudio(null);
+            setAudio(null);
+          }}
+          sx={{ pointerEvents: 'auto' }}
+          color="primary"
+        >
+          <Iconify
+            icon="eva:trash-2-outline"
+            sx={{ width: { xs: 25, sm: 28 }, height: { xs: 25, sm: 28 } }}
+          />
+        </IconButton>
       </Box>
     </Box>
   );
@@ -129,6 +158,7 @@ AudioInput.propTypes = {
   path_to_audio: PropTypes.string,
   setPathToAudio: PropTypes.func,
   audio_length: PropTypes.string,
+  audioLoading: PropTypes.bool,
 };
 
 export default AudioInput;

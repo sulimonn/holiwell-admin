@@ -7,42 +7,59 @@ import { useDispatch } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { A11y, Navigation, Pagination } from 'swiper/modules';
 
-import { Box, Card, alpha, Stack, Button, TextField, IconButton, Typography } from '@mui/material';
-
-import Iconify from 'src/components/iconify';
+import { Card, Stack, Button, Typography } from '@mui/material';
 
 import { toggleSnackbar } from 'src/store/reducers/snackbar';
-import { useGetSliderQuery, useEditSliderMutation } from 'src/store/reducers/sliders';
+import {
+  useGetSlidersQuery,
+  useAddSliderMutation,
+  useEditSliderMutation,
+} from 'src/store/reducers/sliders';
+
+import './pagination.css';
+import SliderCard from './slider-card';
 
 const Slider = () => {
-  const { data = [] } = useGetSliderQuery(1);
+  const { data = [], isFetching } = useGetSlidersQuery();
   const [editSlider, { isLoading }] = useEditSliderMutation();
+  const [addSlider, { isLoading: isAdding }] = useAddSliderMutation();
   const dispatch = useDispatch();
 
-  const [sliders, setSlider] = useState(data);
+  const [sliders, setSliders] = useState(data || []);
 
   React.useEffect(() => {
-    setSlider(data);
+    if (data.length > 0) setSliders(data.filter((slider) => slider?.id !== 7));
   }, [data]);
 
-  const firstRef = React.useRef(null);
-  const secondRef = React.useRef(null);
-  const thirdRef = React.useRef(null);
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = new FormData();
+    sliders.forEach(async (slider) => {
+      const formData = new FormData();
+      Object.keys(slider).forEach((key) => {
+        if (!key.startsWith('path_to')) formData.append(key, slider[key]);
+      });
+      if (slider?.id) {
+        const response = await editSlider({ id: slider?.id, data: formData });
 
-    Object.keys(sliders).forEach((key) => {
-      if (!key.startsWith('path_to')) formData.append(key, sliders[key]);
+        if (response?.error) {
+          dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
+        } else {
+          dispatch(toggleSnackbar({ message: 'Изменения сохранены', type: 'success' }));
+        }
+      } else {
+        const response = await addSlider(formData);
+
+        if (response?.error) {
+          dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
+        } else {
+          dispatch(toggleSnackbar({ message: 'Изменения сохранены', type: 'success' }));
+        }
+      }
     });
-    const response = await editSlider({ id: 1, data: formData });
-
-    if (response?.error) {
-      dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
-    } else {
-      dispatch(toggleSnackbar({ message: 'Изменения сохранены', type: 'success' }));
-    }
   };
+  if (isFetching) {
+    return null;
+  }
 
   return (
     <Card sx={{ p: 3 }}>
@@ -54,120 +71,67 @@ const Slider = () => {
           navigation
           pagination={{ clickable: true }}
           modules={[Pagination, Navigation, A11y]}
+          style={{
+            overflow: 'visible',
+          }}
         >
-          {[
-            {
-              id: 'first',
-              ref: firstRef,
-            },
-            {
-              id: 'second',
-              ref: secondRef,
-            },
-            {
-              id: 'third',
-              ref: thirdRef,
-            },
-          ].map((slider, index) => (
+          {sliders.map((slider, index) => (
             <SwiperSlide key={slider.id}>
-              <Stack spacing={2} sx={{ px: { xs: 2, sm: 4, md: 6 } }}>
-                <Box
-                  width="100%"
-                  height={{ xs: 200, md: 500 }}
-                  overflow="hidden"
-                  position="relative"
-                >
-                  <IconButton
-                    sx={{ position: 'absolute', top: 10, right: 10, zIndex: 9 }}
-                    color="error"
+              <Stack direction="row" justifyContent="center">
+                <SliderCard
+                  slider={slider}
+                  setSlider={setSliders}
+                  index={index}
+                  sliders={sliders}
+                />
+                {index === sliders.length - 1 && (
+                  <Button
                     variant="contained"
+                    sx={{
+                      px: { xs: 1, sm: 2 },
+                      minWidth: 0,
+                    }}
                     onClick={() =>
-                      setSlider({
+                      setSliders([
                         ...sliders,
-                        [`path_to_cover_${slider.id}`]: null,
-                        [`cover_${slider.id}`]: null,
-                      })
+                        {
+                          path_to_cover_first: null,
+                          title_first: null,
+                          text_first: null,
+                        },
+                      ])
                     }
                   >
-                    <Iconify icon="carbon:close" />
-                  </IconButton>
-                  {sliders[`path_to_cover_${slider.id}`] && (
-                    <Box
-                      component="img"
-                      alt="path_to_cover_first"
-                      src={sliders[`path_to_cover_${slider.id}`]}
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  )}
-
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      inset: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: (theme) => alpha(theme.palette.grey[900], 0.4),
-                      color: (theme) => theme.palette.getContrastText(theme.palette.grey[900]),
-                    }}
-                  >
-                    <IconButton
-                      variant="contained"
-                      size="large"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        slider.ref.current.click();
-                      }}
-                      sx={{ p: 2 }}
-                      color="inherit"
-                    >
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        ref={slider.ref}
-                        onChange={(event) => {
-                          const file = event.target.files[0];
-                          if (file) {
-                            setSlider({
-                              ...sliders,
-                              [`path_to_cover_${slider.id}`]: URL.createObjectURL(file),
-                              [`cover_${slider.id}`]: file,
-                            });
-                          }
-                        }}
-                      />
-                      <Iconify icon="eva:camera-fill" sx={{ width: 32, height: 32 }} />
-                    </IconButton>
-                  </Box>
-                </Box>
-                <TextField
-                  fullWidth
-                  label="Заголовок"
-                  value={sliders[`title_${slider.id}`] || ''}
-                  onChange={(event) =>
-                    setSlider({ ...sliders, [`title_${slider.id}`]: event.target.value })
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Описание"
-                  value={sliders[`text_${slider.id}`] || ''}
-                  multiline
-                  rows={2}
-                  onChange={(event) =>
-                    setSlider({ ...sliders, [`text_${slider.id}`]: event.target.value })
-                  }
-                />
+                    +
+                  </Button>
+                )}
               </Stack>
             </SwiperSlide>
           ))}
+          {sliders.length === 0 && (
+            <SwiperSlide>
+              <Stack direction="row" justifyContent="stretch">
+                <Button
+                  variant="outlined"
+                  sx={{ p: 7, width: '100%' }}
+                  onClick={() =>
+                    setSliders([
+                      ...sliders,
+                      {
+                        path_to_cover_first: null,
+                        title_first: null,
+                        text_first: null,
+                      },
+                    ])
+                  }
+                >
+                  Добавить слайд
+                </Button>
+              </Stack>
+            </SwiperSlide>
+          )}
         </Swiper>
-        <Button variant="contained" type="submit" disabled={isLoading}>
+        <Button variant="contained" type="submit" disabled={isLoading || isAdding}>
           Сохранить
         </Button>
       </Stack>

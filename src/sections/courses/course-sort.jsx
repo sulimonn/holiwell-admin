@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 import Menu from '@mui/material/Menu';
 import Button from '@mui/material/Button';
@@ -11,13 +12,12 @@ import Iconify from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 const SORT_OPTIONS = [
-  { value: 'featured', label: 'Рекомендуемые' },
-  { value: 'newest', label: 'Самые новые' },
-  { value: 'priceDesc', label: 'Цена: сначала дороже' },
-  { value: 'priceAsc', label: 'Цена: сначала дешевле' },
+  { value: 'default', label: 'По умолчанию' },
+  { value: 'new', label: 'Самые новые' },
+  { value: 'popular', label: 'По популярности' },
 ];
 
-export default function ShopProductSort() {
+export default function CourseSort({ onSort, sortOption, exclude = [] }) {
   const [open, setOpen] = useState(null);
 
   const handleOpen = (event) => {
@@ -38,7 +38,7 @@ export default function ShopProductSort() {
       >
         Сортировать:&nbsp;{' '}
         <Typography component="span" variant="subtitle2" sx={{ color: 'text.secondary' }}>
-          {SORT_OPTIONS[0].label}
+          {SORT_OPTIONS.find((o) => o.value === sortOption)?.label}
         </Typography>
       </Button>
 
@@ -58,8 +58,15 @@ export default function ShopProductSort() {
           },
         }}
       >
-        {SORT_OPTIONS.map((option) => (
-          <MenuItem key={option.value} selected={option.value === 'newest'} onClick={handleClose}>
+        {SORT_OPTIONS.filter((o) => !exclude.includes(o.value)).map((option) => (
+          <MenuItem
+            key={option.value}
+            selected={option.value === sortOption}
+            onClick={() => {
+              onSort(option.value);
+              handleClose();
+            }}
+          >
             {option.label}
           </MenuItem>
         ))}
@@ -67,3 +74,9 @@ export default function ShopProductSort() {
     </>
   );
 }
+
+CourseSort.propTypes = {
+  onSort: PropTypes.func,
+  sortOption: PropTypes.string,
+  exclude: PropTypes.array,
+};

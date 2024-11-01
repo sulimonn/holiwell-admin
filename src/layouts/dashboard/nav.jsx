@@ -6,9 +6,9 @@ import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Avatar from '@mui/material/Avatar';
 import { alpha } from '@mui/material/styles';
-import { List, Collapse } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import ListItemButton from '@mui/material/ListItemButton';
+import { List, Collapse, TextField } from '@mui/material';
 
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
@@ -20,6 +20,8 @@ import { useAuth } from 'src/contexts';
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
+
+import { useFetchAllTypesQuery } from 'src/store/reducers/course';
 
 import { NAV } from './config-layout';
 import navConfig from './config-navigation';
@@ -65,7 +67,7 @@ export default function Nav({ openNav, onCloseNav }) {
         <Typography variant="subtitle2">{`${user.first_name} ${user.last_name}`}</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          SuperAdmin
+          SuperUser
         </Typography>
       </Box>
     </Box>
@@ -145,13 +147,17 @@ Nav.propTypes = {
 function NavItem({ item }) {
   const pathname = usePathname();
 
-  const active = pathname.includes(item.path);
+  const active = pathname.includes(item.slug) || pathname.includes(item.path);
+  const { data: services = [], isFetching } = useFetchAllTypesQuery();
+  if (isFetching) {
+    return null;
+  }
 
   return (
     <>
       <ListItemButton
         component={RouterLink}
-        href={item.path}
+        href={item?.slug ? `/courses/${item.slug}` : item.path}
         sx={{
           minHeight: 44,
           borderRadius: 0.75,
@@ -191,14 +197,20 @@ function NavItem({ item }) {
         >
           {item.title.length > 16 ? `${item.title.slice(0, 16)}...` : item.title}
         </Box>
-        {item?.children && (
+        {(item?.path === '/courses' || item?.children) && (
           <Iconify
             icon={active ? 'carbon:chevron-down' : 'carbon:chevron-right'}
             sx={{ ml: 'auto' }}
           />
         )}
       </ListItemButton>
-      {item?.children && <NavSub open={active} items={item.children} />}
+      {(item?.path === '/courses' || item?.children) && (
+        <NavSub
+          open={active}
+          items={item?.path === '/courses' ? services : item.children}
+          addButton
+        />
+      )}
     </>
   );
 }
@@ -209,7 +221,8 @@ NavItem.propTypes = {
 
 // ----------------------------------------------------------------------
 
-function NavSub({ open, items }) {
+function NavSub({ open, items, addButton = false }) {
+  const [isAdd, setIsAdd] = React.useState(false);
   return (
     <Collapse in={open} timeout="auto" unmountOnExit sx={{ pl: 3 }}>
       <List
@@ -249,6 +262,62 @@ function NavSub({ open, items }) {
             <NavItem item={item} />
           </Box>
         ))}
+
+        {addButton && (
+          <Box
+            sx={{
+              position: 'relative',
+              ml: 1.5,
+              '&:before': {
+                left: '0px',
+                top: '15px',
+                content: '""',
+                position: 'absolute',
+                width: '12px',
+                height: '12px',
+                transform: 'translate(calc(12px * -1), calc(12px * -0.4))',
+                backgroundColor: 'primary.light',
+                mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23efefef' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E\") 50% 50% / 100% no-repeat",
+              },
+            }}
+          >
+            {!isAdd ? (
+              <ListItemButton
+                onClick={() => setIsAdd(!isAdd)}
+                sx={{
+                  color: 'text.primary',
+                  '&:hover': {
+                    bgcolor: 'transparent',
+                  },
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{ whiteSpace: 'nowrap' }}
+                  variant="body2"
+                  color="text.secondary"
+                >
+                  Добавить сервис
+                </Typography>
+              </ListItemButton>
+            ) : (
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <TextField size="small" variant="outlined" label="Название сервиса" />
+
+                <Iconify
+                  icon="carbon:checkmark"
+                  sx={{ color: 'success.main', cursor: 'pointer' }}
+                />
+
+                <Iconify
+                  icon="carbon:close"
+                  onClick={() => setIsAdd(!isAdd)}
+                  sx={{ cursor: 'pointer' }}
+                />
+              </Stack>
+            )}
+          </Box>
+        )}
       </List>
     </Collapse>
   );
@@ -257,4 +326,5 @@ function NavSub({ open, items }) {
 NavSub.propTypes = {
   open: PropTypes.bool,
   items: PropTypes.array,
+  addButton: PropTypes.bool,
 };

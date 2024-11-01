@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { Button } from '@mui/material';
@@ -17,8 +18,8 @@ import CourseSort from '../course-sort';
 
 export default function CoursesView() {
   const { type } = useParams();
-  const { data: course = {}, isSuccess } = useGetCourseByTypeQuery(type);
-
+  const [sortOption, setSortOption] = React.useState('new');
+  const { data: course = {}, isSuccess } = useGetCourseByTypeQuery({ type, sort_by: sortOption });
   if (!isSuccess) {
     return null;
   }
@@ -36,7 +37,7 @@ export default function CoursesView() {
         sx={{ mb: 5 }}
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          <CourseSort />
+          <CourseSort onSort={setSortOption} sortOption={sortOption} exclude={['default']} />
         </Stack>
         <Button
           component={Link}

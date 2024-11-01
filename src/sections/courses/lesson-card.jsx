@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { alpha } from '@mui/material/styles';
@@ -10,9 +11,14 @@ import { fShortenNumber } from 'src/utils/format-number';
 import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 
+import { toggleSnackbar } from 'src/store/reducers/snackbar';
+import { useDeleteLessonMutation } from 'src/store/reducers/course';
+
 // ----------------------------------------------------------------------
 
 export default function LessonCard({ post, index, link }) {
+  const [deleteLesson, { isLoading }] = useDeleteLessonMutation();
+  const dispatch = useDispatch();
   const { path_to_cover: cover, title, number_of_views: view, trainer } = post;
 
   const latestPostLarge = index === 0;
@@ -153,6 +159,15 @@ export default function LessonCard({ post, index, link }) {
           backgroundColor: 'grey.500',
         },
       }}
+      onClick={async () => {
+        const response = await deleteLesson(post.id);
+        if (!response?.error) {
+          dispatch(toggleSnackbar({ message: 'Урок удален', type: 'success' }));
+        } else {
+          dispatch(toggleSnackbar({ message: 'Произошла ошибка', type: 'error' }));
+        }
+      }}
+      disabled={isLoading}
     >
       <Iconify icon="carbon:trash-can" />
     </IconButton>
@@ -164,9 +179,9 @@ export default function LessonCard({ post, index, link }) {
         <Box
           sx={{
             position: 'relative',
-            pt: 'calc(100% * 3 / 4)',
+            pt: 'calc(100% * 2 / 4)',
             ...((latestPostLarge || latestPost) && {
-              pt: 'calc(100% * 4 / 3)',
+              pt: 'calc(100% * 2.7 / 3)',
               '&:after': {
                 top: 0,
                 content: "''",
@@ -178,8 +193,8 @@ export default function LessonCard({ post, index, link }) {
             }),
             ...(latestPostLarge && {
               pt: {
-                xs: 'calc(100% * 4 / 3)',
-                sm: 'calc(100% * 3 / 4.66)',
+                xs: 'calc(100% * 3 / 3)',
+                sm: 'calc(100% * 2 / 4.66)',
               },
             }),
           }}

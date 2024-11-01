@@ -140,12 +140,10 @@ const CourseForm = () => {
           }}
         />
 
-        {type === 'training' && (
-          <AudioInput
-            path_to_audio={course?.cover_audio}
-            setPathToAudio={(path) => setCourse({ ...course, cover_audio: path })}
-          />
-        )}
+        <AudioInput
+          path_to_audio={course?.cover_audio}
+          setPathToAudio={(path) => setCourse({ ...course, cover_audio: path })}
+        />
       </Box>
       <Button
         type="submit"
@@ -157,7 +155,6 @@ const CourseForm = () => {
           !course?.description ||
           !course?.cover ||
           !course?.price_cource ||
-          !course?.cover_audio ||
           isLoading
         }
       >

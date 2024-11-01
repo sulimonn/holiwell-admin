@@ -1,3 +1,5 @@
+/* eslint-disable arrow-body-style */
+import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
@@ -18,46 +20,113 @@ import { useRouter } from 'src/routes/hooks';
 import { debounce } from 'src/utils/utlities';
 
 import Iconify from 'src/components/iconify';
+import AvatarCutterDialog from 'src/components/cutter';
 
+import { toggleSnackbar } from 'src/store/reducers/snackbar';
 import {
   useGetCourseQuery,
   useEditCourseMutation,
   useDeleteCourseMutation,
+  useAddNextLessonMutation,
+  useAddPrevLessonMutation,
+  useDeleteNextLessonMutation,
+  useDeletePrevLessonMutation,
 } from 'src/store/reducers/course';
 
 import AudioInput from '../audio';
+import AudioCard from '../audio-card';
+import ReorderLessons from './reorder';
 import LessonCard from '../lesson-card';
 import CourseSort from '../course-sort';
 
+// const orderLessons = (lessons) => {
+//   const lessonsById = Object.fromEntries(lessons.map((lesson) => [lesson.id, lesson]));
+
+//   let currentLesson = lessons.find((lesson) => !lesson.prev_lesson_id);
+
+//   const orderedLessons = [];
+
+//   while (currentLesson) {
+//     orderedLessons.push(currentLesson);
+//     currentLesson = lessonsById[currentLesson.next_lesson_id] || null; // Переходим к следующему уроку
+//   }
+
+//   return orderedLessons;
+// };
+
 const CourseView = () => {
   const { courseId: id } = useParams();
-  const { data = {}, isSuccess, isFetching } = useGetCourseQuery(id);
+  const dispatch = useDispatch();
+  const [sortOption, setSortOption] = useState('default');
+  const { data = {}, isSuccess, isFetching } = useGetCourseQuery({ id, sort_by: sortOption });
   const [editCourse] = useEditCourseMutation();
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation();
+  const [addNext] = useAddNextLessonMutation();
+  const [deleteNext] = useDeleteNextLessonMutation();
+  const [addPrev] = useAddPrevLessonMutation();
+  const [deletePrev] = useDeletePrevLessonMutation();
   const [course, setCourse] = useState(data);
+  const [reorder, setReorder] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [cover, setCover] = useState();
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const audioRef = useRef(new Audio());
+  const [playing, setPlaying] = React.useState(false);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setCourse(data);
+      setCover(data?.path_to_cover);
+    }
+  }, [isSuccess, data]);
+
+  const handlePlayPause = (audio_id, audioPath) => {
+    if (playing === audio_id) {
+      audioRef.current.pause();
+      setPlaying(null);
+    } else {
+      if (audioRef.current.src !== audioPath) {
+        audioRef.current.src = audioPath;
+      }
+      audioRef.current
+        .play()
+        .then(() => setPlaying(audio_id))
+        .catch((error) => console.error('Error playing audio:', error));
+    }
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (audio) {
+      audio.onended = () => {
+        setPlaying(null);
+      };
+    }
+    return () => {
+      if (audio) audio.pause();
+    };
+  }, []);
 
   const fileInputRef = useRef(null);
   const router = useRouter();
 
   const handleMediaChange = async (file) => {
-    if (file) {
-      const formData = new FormData();
-      formData.append('cover_audio', file);
-      const response = await editCourse({ id, data: formData });
-      if (!response?.data) {
-        setCourse((prevLesson) => ({
-          ...prevLesson,
-          [`path_to_url_audio`]: URL.createObjectURL(file),
-        }));
-      }
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append('cover_audio', file);
+    const response = await editCourse({ id, data: formData });
+    if (!response?.data) {
+      setCourse((prevLesson) => ({
+        ...prevLesson,
+        [`path_to_url_audio`]: file ? URL.createObjectURL(file) : null,
+      }));
+      dispatch(toggleSnackbar({ open: true, message: 'Аудио обновлено', type: 'success' }));
     }
-  };
 
-  useEffect(() => {
-    if (isSuccess) {
-      setCourse(data);
-    }
-  }, [isSuccess, data]);
+    setIsLoading(false);
+  };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSave = useCallback(
@@ -89,12 +158,64 @@ const CourseView = () => {
     setCourse((prevCourse) => ({ ...prevCourse, price_cource: newPrice }));
     debouncedSave('price_cource', newPrice);
   };
+
+  const handleReorder = async () => {
+    course.lessons.forEach(async (lesson) => {
+      if (lesson.links_after?.id) {
+        // await deleteNext(lesson.links_after.linked_lesson_id);
+        // await deleteNext(lesson.links_after.lesson_id);
+        await deleteNext(lesson.links_after.id);
+      }
+      if (lesson.links_before?.id) {
+        // await deletePrev(lesson.links_before.linked_lesson_id);
+        // await deletePrev(lesson.links_before.lesson_id);
+        await deletePrev(lesson.links_before.id);
+      }
+      if (lesson.next_lesson_id) {
+        await addNext({ lesson_id: lesson.id, link_after_lesson_id: lesson.next_lesson_id });
+      }
+      if (lesson.prev_lesson_id) {
+        await addPrev({ lesson_id: lesson.id, link_before_lesson_id: lesson.prev_lesson_id });
+      }
+    });
+    dispatch(
+      toggleSnackbar({
+        open: true,
+        message: 'Уроки перемещены',
+        severity: 'success',
+      })
+    );
+    setReorder(false);
+  };
   if (!isSuccess || isFetching) {
     return null;
   }
+  const handleSortChange = (value) => {
+    setSortOption(value);
+  };
 
   return (
     <Container>
+      <AvatarCutterDialog
+        image={cover}
+        setImage={async (file) => {
+          if (file) {
+            const formData = new FormData();
+            formData.append('cover', file);
+            const response = await editCourse({ id, data: formData });
+            if (!response?.data) {
+              setCourse((prevCourse) => ({
+                ...prevCourse,
+                path_to_cover: URL.createObjectURL(file),
+              }));
+              setCover(URL.createObjectURL(file));
+            }
+          }
+        }}
+        open={openDialog}
+        handleClose={() => setOpenDialog(false)}
+        shape="rect"
+      />
       <Box display="flex" mb={2}>
         <Button
           onClick={async () => {
@@ -120,7 +241,7 @@ const CourseView = () => {
         <Box
           component="img"
           alt={course.title}
-          src={course.path_to_cover}
+          src={cover}
           sx={{
             width: '100%',
             height: '100%',
@@ -152,19 +273,10 @@ const CourseView = () => {
               type="file"
               hidden
               ref={fileInputRef}
-              onChange={async (event) => {
+              onChange={(event) => {
                 const file = event.target.files[0];
-                if (file) {
-                  const formData = new FormData();
-                  formData.append('cover', file);
-                  const response = await editCourse({ id, data: formData });
-                  if (!response?.data) {
-                    setCourse((prevCourse) => ({
-                      ...prevCourse,
-                      path_to_cover: URL.createObjectURL(file),
-                    }));
-                  }
-                }
+                setCover(URL.createObjectURL(file));
+                setOpenDialog(true);
               }}
             />
             <Iconify icon="eva:camera-fill" sx={{ width: 32, height: 32 }} />
@@ -206,44 +318,75 @@ const CourseView = () => {
           }}
         />
 
-        {course.course_type_slug === 'training' && (
-          <AudioInput
-            path_to_audio={course.path_to_url_audio}
-            setPathToAudio={(file) => {
-              handleMediaChange(file);
-            }}
-          />
-        )}
+        <AudioInput
+          path_to_audio={course?.path_to_url_audio}
+          setPathToAudio={(file) => {
+            handleMediaChange(file);
+          }}
+          audioLoading={isLoading}
+        />
       </Box>
       <Stack
         direction="row"
         alignItems="center"
         flexWrap="wrap-reverse"
-        justifyContent="space-between"
+        justifyContent={{ xs: 'space-between', sm: 'flex-end' }}
+        gap={1}
         sx={{ mb: 5 }}
       >
-        <CourseSort />
-        <Button
-          component={Link}
-          to={`/courses/${course.course_type_slug}/${course.id}/add`}
-          variant="contained"
-          color="inherit"
-          startIcon={<Iconify icon="eva:plus-fill" />}
-        >
-          Новый урок
-        </Button>
+        <CourseSort onSort={handleSortChange} sortOption={sortOption} />
+        <Stack direction="row" spacing={1}>
+          <Button
+            component={Link}
+            to={`/courses/${course.course_type_slug}/${course.id}/add`}
+            variant="contained"
+            color="inherit"
+            startIcon={<Iconify icon="eva:plus-fill" />}
+          >
+            {course.course_type_slug === 'training' ? 'Новый урок' : 'Добавить аудио'}
+          </Button>
+          {!reorder ? (
+            <Button onClick={() => setReorder((prev) => !prev)} variant="contained" color="inherit">
+              Изменить порядок
+            </Button>
+          ) : (
+            <Button onClick={handleReorder} variant="contained" color="inherit">
+              Сохранить
+            </Button>
+          )}
+        </Stack>
       </Stack>
-      <Grid container spacing={3}>
-        {course.lessons &&
-          course.lessons.map((lesson, index) => (
-            <LessonCard
-              key={lesson.id}
-              post={lesson}
-              index={index}
-              link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
-            />
-          ))}
-      </Grid>
+      {!reorder ? (
+        <Grid container spacing={3}>
+          {course.lessons &&
+            (course.course_type_slug === 'training' ? (
+              course.lessons.map((lesson, index) => (
+                <LessonCard
+                  key={lesson.id}
+                  post={lesson}
+                  index={index}
+                  link={`/courses/${lesson.course_type_slug}/${lesson.course_id}/${lesson.id}`}
+                />
+              ))
+            ) : (
+              <Box maxWidth={800} width="100%" display="flex" flexDirection="column" mx="auto">
+                {course.lessons.map((lesson) => (
+                  <AudioCard
+                    lesson={lesson}
+                    key={lesson.id}
+                    handlePlayPause={handlePlayPause}
+                    playing={playing}
+                  />
+                ))}
+              </Box>
+            ))}
+        </Grid>
+      ) : (
+        <ReorderLessons
+          initialLessons={course?.lessons || []}
+          setLessons={(lessons) => setCourse({ ...course, lessons })}
+        />
+      )}
     </Container>
   );
 };

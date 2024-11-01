@@ -30,21 +30,21 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://154.194.52.246:8000/api',
+        target: 'https://holiwell.ru/api',
         changeOrigin: true,
         rewrite: (path) => {
           return path.replace(/^\/api/, '');
         },
       },
       '/auth': {
-        target: 'http://154.194.52.246:8000/auth',
+        target: 'https://holiwell.ru/auth',
         changeOrigin: true,
         rewrite: (path) => {
           return path.replace(/^\/auth/, '');
         },
       },
       '/files': {
-        target: 'http://154.194.52.246/files',
+        target: 'https://holiwell.ru/files',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/files/, ''),
       },

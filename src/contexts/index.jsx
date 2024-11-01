@@ -11,7 +11,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [login] = useLoginMutation();
   const {
@@ -31,9 +31,10 @@ const AuthProvider = ({ children }) => {
     // Check if there is no auth token, redirect immediately
     if (!localStorage.getItem('authToken')) {
       router.push('/login');
-      return;
     }
+  }, [router]);
 
+  useEffect(() => {
     // If still fetching or loading, do not perform any redirection yet
     if (isFetching || isLoading) {
       return;
@@ -42,6 +43,7 @@ const AuthProvider = ({ children }) => {
     if (userData) {
       setUser(userData);
       setIsAuthenticated(true);
+
       if (userData.is_superuser) {
         setUser(userData);
         setIsAuthenticated(true);
@@ -49,6 +51,7 @@ const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
         setUser(null);
         router.push('/login');
+        localStorage.clear();
       }
     }
   }, [userData, isFetching, isLoading, router]);

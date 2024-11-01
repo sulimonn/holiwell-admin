@@ -9,7 +9,8 @@ import ShopCourseCard from 'src/sections/courses/course-card';
 import { useGetCoursesQuery } from 'src/store/reducers/course';
 
 const CourseTypeView = () => {
-  const { data: courses = [], isSuccess } = useGetCoursesQuery();
+  const [sortOption, setsortOption] = React.useState('new');
+  const { data: courses = [], isSuccess } = useGetCoursesQuery(sortOption);
 
   if (!isSuccess) {
     return null;
@@ -29,7 +30,7 @@ const CourseTypeView = () => {
         sx={{ mb: 5 }}
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          <CourseSort />
+          <CourseSort onSort={setsortOption} sortOption={sortOption} exclude={['default']} />
         </Stack>
       </Stack>
       <Box>

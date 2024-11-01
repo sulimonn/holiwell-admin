@@ -17,6 +17,7 @@ const trainers = apiSlice.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
+      invalidatesTags: ['Trainers'],
     }),
     deleteTrainer: builder.mutation({
       query: (id) => ({

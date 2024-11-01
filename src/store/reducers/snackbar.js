@@ -4,6 +4,7 @@ const initialState = {
   opened: false,
   message: null,
   type: '',
+  progress: 0,
 };
 
 export const snackbar = createSlice({
@@ -20,9 +21,12 @@ export const snackbar = createSlice({
       state.message = null;
       state.type = '';
     },
+    setUploadProgress: (state, action) => {
+      state.progress = action.payload;
+    },
   },
 });
 
-export const { toggleSnackbar, closeSnackbar } = snackbar.actions;
+export const { toggleSnackbar, closeSnackbar, setUploadProgress } = snackbar.actions;
 
 export default snackbar.reducer;

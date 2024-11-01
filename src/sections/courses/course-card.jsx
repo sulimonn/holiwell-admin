@@ -40,7 +40,7 @@ export default function ShopCourseCard({ course, link }) {
         {course.priceSale && fCurrency(course.priceSale)}
       </Typography>
       &nbsp;
-      {fCurrency(course.price)}
+      {fCurrency(course.cource_price)}
     </Typography>
   );
 
@@ -78,8 +78,8 @@ export default function ShopCourseCard({ course, link }) {
           </Typography>
 
           {/* <Stack direction="row" alignItems="center" justifyContent="space-between">
-          {renderPrice}
-        </Stack>  */}
+            {renderPrice}
+          </Stack> */}
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             {renderDescription}
           </Stack>

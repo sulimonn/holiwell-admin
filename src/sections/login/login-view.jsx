@@ -68,7 +68,6 @@ export default function LoginView() {
 
             setStatus({ success: false });
           }
-          console.log(response);
 
           if (!response) {
             router.push('/', { replace: true });
